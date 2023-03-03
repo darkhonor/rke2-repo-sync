@@ -1,0 +1,49 @@
+---
+###
+#
+# Ansible Playbook to Synchronize the RKE2 Installation Artifacts to a local repository
+# for installation on an air-gapped system
+#
+###
+- name: Synchronize RKE2 Artifacts
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: false
+  vars_files:
+    - rke2-sync-vars.yml
+  tasks:
+    - name: Create Repository Folder
+      ansible.builtin.file:
+        path: "{{ rke2_repo_folder }}/{{ rke2_version }}/"
+        mode: '0755'
+        state: directory
+    - name: Download Installation Script
+      ansible.builtin.get_url:
+        url: '{{ rke2_install_bash_url }}'
+        dest: "{{ rke2_repo_folder }}/rke2-install.sh"
+        mode: '0755'
+        force: true   # This makes this call non-idempotent--it will redownload the script every time
+    - name: Download RKE2 checksum and artifacts
+      block:
+        - name: Download sha256 checksum file
+          ansible.builtin.get_url:
+            url: "{{ rke2_artifact_url }}/{{ rke2_version }}/sha256sum-{{ rke2_architecture }}.txt"
+            dest: "{{ rke2_repo_folder }}/{{ rke2_version }}/sha256sum-{{ rke2_architecture }}.txt"
+            force: true
+            mode: 0644
+            timeout: 30
+        - name: Download RKE2 artifacts and compare with checksums
+          ansible.builtin.get_url:
+            url: "{{ rke2_artifact_url }}/{{ rke2_version }}/{{ item }}"
+            dest: "{{ rke2_repo_folder }}/{{ rke2_version }}/{{ item }}"
+            mode: 0644
+            checksum: "sha256:{{ rke2_artifact_url }}/{{ rke2_version }}/sha256sum-{{ rke2_architecture }}.txt"
+            timeout: 30
+          with_items: "{{ rke2_artifact | reject('search', 'sha256sum') | list }}"
+        - name: Download Image Inventory files
+          ansible.builtin.get_url:
+            url: "{{ rke2_artifact_url }}/{{ rke2_version }}/{{ item }}"
+            dest: "{{ rke2_repo_folder }}/{{ rke2_version }}/{{ item }}"
+            mode: 0644
+          with_items: "{{ rke2_image_inventory }}"
