@@ -21,7 +21,7 @@
     - name: Download Installation Script
       ansible.builtin.get_url:
         url: '{{ rke2_install_bash_url }}'
-        dest: "{{ rke2_repo_folder }}/rke2-install.sh"
+        dest: "{{ rke2_repo_folder }}/{{ rke2_version }}/rke2-install.sh"
         mode: '0755'
         force: true   # This makes this call non-idempotent--it will redownload the script every time
     - name: Download RKE2 checksum and artifacts
