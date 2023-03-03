@@ -3,14 +3,10 @@
 rke2_version: v1.26.0+rke2r2
 
 # URL to RKE2 install bash script
-# e.g. rancher chinase mirror http://rancher-mirror.rancher.cn/rke2/install.sh
 rke2_install_bash_url: https://get.rke2.io
 
 # GPG Key for signed RPMs
 gpg_key_path: https://rpm.rancher.io/public.key
-
-# RKE2 channel
-rke2_channel: stable
 
 # Architecture to be downloaded, currently there are releases for amd64 and s390x
 rke2_architecture: amd64

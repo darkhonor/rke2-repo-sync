@@ -24,6 +24,11 @@
         dest: "{{ rke2_repo_folder }}/{{ rke2_version }}/rke2-install.sh"
         mode: '0755'
         force: true   # This makes this call non-idempotent--it will redownload the script every time
+    - name: Download RPM GPG Key
+      ansible.builtin.get_url:
+        url: '{{ gpg_key_path }}'
+        dest: "{{ rke2_repo_folder }}/{{ rke2_version }}/rancher.key"
+        mode: '0644'
     - name: Download RKE2 checksum and artifacts
       block:
         - name: Download sha256 checksum file
